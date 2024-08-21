@@ -13,7 +13,7 @@ def query_orders(db):
     戻り値:
         注文を表すタプルのリスト
     """
-    query = ""  # ここにSQLクエリを書いてください
+    query = "SELECT * FROM Orders ORDER by OrderID"  # ここにSQLクエリを書いてください
     results = db.execute(query)
     results = results.fetchall()
     return results
@@ -33,8 +33,13 @@ def get_orders_range(db, date_from, date_to):
     戻り値:
         注文を表すタプルのリスト
     """
-    query = ""  # ここにSQLクエリを書いてください
-    results = db.execute(query)
+    query = """
+    SELECT * FROM Orders
+    WHERE OrderDate > ? AND OrderDate <= ? 
+    ORDER by OrderDate
+    """
+    # ここにSQLクエリを書いてください
+    results = db.execute(query, (date_from, date_to))
     results = results.fetchall()
     return results
 
@@ -50,32 +55,37 @@ def get_order_details(db):
     戻り値:
         注文の詳細情報を表すタプルのリスト
     """
-    query = ""  # ここにSQLクエリを書いてください
+    query =  """
+    SELECT OrderDetails.OrderID, Products.ProductName, OrderDetails.Quantity 
+    FROM OrderDetails 
+    JOIN Products ON OrderDetails.ProductID = Products.ProductID 
+    ORDER BY OrderDetails.OrderID
+    """  # ここにSQLクエリを書いてください
     results = db.execute(query)
     results = results.fetchall()
     return results
 
 def main():
     # SQLiteデータベースに接続
-    conn = sqlite3.connect('northwind.db')
+    conn = sqlite3.connect('../data/northwind.db')
 
     # query_orders関数のテスト
     print("All Orders:")
     # 必要に応じて出力の形式を変更してください
     for order in query_orders(conn):
-        print(order)
+        print(f"OrderID: {order[0]}, CustomerID: {order[1]}, EmployeeID: {order[2]}, OrderDate: {order[3]}, ShipperID: {order[4]}")
 
     # get_orders_range関数のテスト
     print("\nOrders in a specified date range:")
     # データベースにある実際の日付に置き換えてください
     for order in get_orders_range(conn, '1996-07-04', '1996-07-10'):
-        print(order)
+        print(f"OrderID: {order[0]}, CustomerID: {order[1]}, EmployeeID: {order[2]}, OrderDate: {order[3]}, ShipperID: {order[4]}")
 
     # get_order_details関数のテスト
     print("\nOrder Details:")
     # 必要に応じて出力の形式を変更してください
     for detail in get_order_details(conn):
-        print(detail)
+        print(f"OrderID: {detail[0]}, ProductName: {detail[1]}, Quantiry: {detail[2]}")
 
     # データベース接続を閉じる
     conn.close()
